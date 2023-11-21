@@ -1,0 +1,157 @@
+import java.util.*;
+
+class JeuDuChameauV2 {
+    Scanner sc = new Scanner(System.in);
+    Random rand = new Random();
+
+    int KM_VOYAGE = 300;
+    int KM_NORM_MIN = 10;
+    int KM_NORM_MAX = 15;
+    int KM_RAP_MIN = 20;
+    int KM_RAP_MAX = 25;
+    int AVANTAGE_VOYAGEUR = 20;
+    int GOURDE_PLEINE = 12;
+    int MORT_SOIF = 4;
+    int MORT_FATIGUE = 4;
+    int DIF_AIDE = 3;
+    int AVANCE_NATIFS = 8;
+
+    int kmVoyageur = 0;
+    int kmNatifs = kmVoyageur - AVANTAGE_VOYAGEUR;
+    int gourde = GOURDE_PLEINE / 2;
+    int soif = 0;
+    int fatigue = 0;
+    int action = 0;
+
+    void presentation() {
+        System.out.println("Vous avez volé un chameau pour traverser le grand désert de Gobi. Maintenant les natifs vous recherchent");
+        System.out.println("Votre objectif principal est de parcourir 300 km dans le désert sans mourir afin d'échapper aux natifs");
+    }
+
+    void tourParTour() {
+        action();
+        deplacement_natif();
+        affichage_stats();
+    }
+
+    void action() {
+        System.out.println("Tour " + (kmVoyageur / 10 + 1)); // Affiche le numéro du tour
+
+        System.out.println("Que souhaitez-vous faire ? Vous pouvez : ");
+        System.out.println(" ");
+        System.out.println("1 Boire");
+        System.out.println("2 Avancer normalement");
+        System.out.println("3 Avancer rapidement");
+        System.out.println("4 Repos");
+        System.out.println("5 Attendre de l'aide");
+        System.out.println("6 Abandonner");
+        action = sc.nextInt();
+
+        switch (action) {
+            case 1:
+                System.out.println("Vous avez choisi de boire.");
+                if (gourde == 0) {
+                    System.out.println("Vous n'avez plus d'eau");
+                    action = 7;
+                } else {
+                    gourde = gourde - 1;
+                    System.out.println("Vous avez bu 1 gorgée dans votre gourde.");
+                    System.out.println("Il vous en reste " + gourde + ".");
+                    soif = 0;
+                }
+                break;
+            case 2:
+                System.out.println("Vous avez choisi d'avancer normalement.");
+                fatigue += 1;
+                soif += 1;
+                int temp = kmVoyageur;
+                kmVoyageur += rand.nextInt(KM_NORM_MIN, KM_NORM_MAX);
+                System.out.println("Vous avez avancé de " + (kmVoyageur - temp) + " Km");
+                if (kmVoyageur >= KM_VOYAGE) {
+                    action = 8;
+                }
+                break;
+            case 3:
+                System.out.println("Vous avez choisi d'avancer rapidement.");
+                fatigue += 2;
+                soif +=2;
+                int temp2 = kmVoyageur;
+                kmVoyageur += rand.nextInt(KM_RAP_MIN, KM_RAP_MAX);
+                System.out.println("Vous avez avancé de " + (kmVoyageur - temp2) + " Km");
+                if (kmVoyageur >= KM_VOYAGE) {
+                    System.out.println("Bravo vous avez survécu ! ");
+                    action = 8;
+                }
+                break;
+            case 4:
+                System.out.println("Vous avez choisi de vous reposer.");
+                fatigue = 0;
+                soif = soif -2;
+                gourde = gourde -1
+                System.out.println("Vous avez bu et votre chameau êtes reposés");
+                break;
+            case 5:
+                System.out.println("Vous avez choisi d'attendre de l'aide.");
+                int temp3 = rand.nextInt(0, DIF_AIDE);
+                if (kmNatifs >= kmVoyageur) {
+                    System.out.println("Vous avez été attrapé par les natifs ! ");
+                    action = 7;
+                }
+                if (temp3 == 0) {
+                    System.out.println("Vous avez trouvé de l'aide, quelques gorgées ont été ajoutées à votre gourde");
+                    gourde += 3;
+                    if (gourde > GOURDE_PLEINE) {
+                        gourde = 6;
+                    }
+                } else {
+                    System.out.println("Vous n'avez pas trouvé d'aide");
+                }
+                break;
+            case 6:
+                System.out.println("Vous avez choisi d'abandonner.");
+                break;
+            case 7:
+                System.out.println("Vous êtes mort.");
+                break;
+            case 8:
+                System.out.println("Vous avez gagné.");
+                break;
+            default:
+                System.out.println("Choix non valide. Veuillez réessayer.");
+                action = 0; // Réinitialise action à 0 pour répéter la boucle
+        }
+    }
+
+    void affichage_stats() {
+        System.out.println("Vous avez parcouru " + kmVoyageur + " Km");
+        System.out.println("Il vous reste " + gourde + " gorgées");
+        System.out.println("Il vous reste " + (KM_VOYAGE - kmVoyageur) + " Km à parcourir");
+        System.out.println("Tayx de soif à  " + soif + " 4 étant le maximum ");
+    }
+
+    void deplacement_natif() {
+        int klo = rand.nextInt(0, 1);
+        if (klo == 0) {
+            kmNatifs += rand.nextInt(0, AVANCE_NATIFS) * 2;
+        } else {
+            kmNatifs += rand.nextInt(0, AVANCE_NATIFS);
+        }
+        if (kmNatifs >= kmVoyageur) {
+            System.out.println("Vous avez été attrapé par les natifs ! ");
+            action = 7;
+        }
+        System.out.println("Les natifs sont " + (kmVoyageur - kmNatifs) + " Km derrière vous");
+    }
+
+
+    void jeu() {
+        presentation();
+        while (kmVoyageur < KM_VOYAGE && action != 6 && action != 7 && action != 8) {
+            tourParTour();
+        }
+    }
+
+    public static void main(String[] args) {
+        new JeuDuChameauV2().jeu();
+    }
+}
